@@ -1,7 +1,5 @@
 const { color, effect, clear } = require('./styles')
 
-const prompt = `${color.red}>${color.yellow}>${color.green}>${effect.reset} `
-
 const questions = [
   'Have you double checked the story requirements?',
   'Does your development fulfills the story requirements?',
@@ -12,16 +10,24 @@ const questions = [
   'Are unit and integration tests passing?'
 ]
 
-const styleQuestion = (text) =>
-  `\n${color.white}${text}${effect.reset} ${effect.dim}[Y/(N)]${effect.reset}\n\n`
+const info = () => `${effect.dim}[Y/(N)]${effect.reset}\n`
+const checkIcon = () => `${color.green}✔${effect.reset}\n`
 
-const generateQuestions = (questions) => {
-  return questions.map((text) => {
-    return {
-      question: styleQuestion(text),
-      answer: 'N'
-    }
-  })
+const styleQuestion = (text, checked) => 
+  (checked)
+    ? `\n${color.white}${text}${effect.reset} ${checkIcon()}`
+    : `\n${color.white}${text}${effect.reset} ${info()}`
+
+const styleQuestions = (current, answered) => {
+  const styledAnswered = answered.map(q => styleQuestion(q.text, true))
+  if (typeof current === 'undefined') {
+    return styledAnswered
+  } else {
+    return [
+      ...styledAnswered,
+      styleQuestion(current.text)
+    ]
+  }
 }
 
 /**
@@ -37,7 +43,7 @@ const intro = `${clear}${color.green}${effect.dim}
                                                
 ${effect.reset}`
 
-const victory = `${color.green}${effect.dim}
+const victory = `\n${color.green}${effect.dim}
 ᕕ( ᐛ )ᕗ
 
 ${effect.reset}`
@@ -48,8 +54,8 @@ const defeat = `${color.red}${effect.dim}
 ${effect.reset}`
 
 module.exports = {
-  prompt,
-  questions: generateQuestions(questions),
+  styleQuestion,
+  styleQuestions,
   intro,
   victory,
   defeat

@@ -3,47 +3,71 @@
 const process = require('process')
 const readline = require('readline')
 
-const { intro, questions, victory, defeat } = require('./src/texts')
+const questions = require('./data/questions')
+const { intro, victory, defeat, styleQuestions } = require('./src/texts')
+const { clear } = require('./src/styles')
 
 const rl = readline.createInterface({
   input: process.stdin,
   output: process.stdout
 })
 
-const ask = (question) => {
-  rl.write(question)
+readline.emitKeypressEvents(process.stdin);
+process.stdin.setRawMode(true);
 
+function askConfirmation() {
   return new Promise((resolve) => {
-    rl.on('line', (input) => {
-      return resolve(input)
-    })
+    process.stdin.on('keypress', (str, key) => {
+      if (key.ctrl && key.name === 'c') {
+        process.exit();
+      } else {
+        return resolve(str)
+      }
+    });
   })
 }
 
-const shouldContinue = (answer) => {
+function shouldContinue(answer) {
   answer = answer.trim().toLowerCase()
   if (answer !== 'y') {
+    rl.write(clear)
     rl.write(defeat)
     process.exit()
   }
 }
 
-const interrogate = (questions) => {
-  const { question } = questions[0]
+function render(
+  remaining = [], 
+  answered = []
+) {
+  rl.write(clear)
+  rl.write(intro)
+  styleQuestions(remaining[0], answered).map(text => rl.write(text))
 
-  ask(question).then((answer) => {
+  if (remaining.length === 0) {
+    rl.write(victory)
+  }
+}
+
+function interrogate(
+  remaining, 
+  answered = []
+) {
+  render(remaining, answered)
+
+  askConfirmation().then((answer) => {
     shouldContinue(answer)
 
-    if (questions.length !== 1) {
-      interrogate([
-        ...questions.slice(1, questions.length)
-      ])
+    if (remaining.length !== 1) {
+      interrogate(
+        [ ...remaining.slice(1, remaining.length) ],
+        [ ...answered, remaining[0] ]
+      )
     } else {
-      rl.write(victory)
+      render(undefined, [ ...answered, ...remaining ])
       process.exit()
     }
   })
 }
 
-rl.write(intro)
 interrogate(questions)

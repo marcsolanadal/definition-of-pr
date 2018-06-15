@@ -8,8 +8,6 @@ This helper will be called `pr-publish` or a similar name in the future.
 
 ### Needed:
 
-- Check inputs instead of readline
-- Add (check) when something is done
 - Execute actions for each question in case we haven't done it
 - Add list of possible impacts and generate comment with it
 
