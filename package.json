@@ -1,0 +1,14 @@
+{
+  "name": "definition-of-pr",
+  "version": "1.0.0",
+  "description": "",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "bin": {
+    "definition-of-pr": "./index.js"
+  },
+  "author": "",
+  "license": "ISC"
+}
