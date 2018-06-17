@@ -6,6 +6,7 @@ const readline = require('readline')
 const questions = require('./data/questions')
 const { intro, victory, defeat, styleQuestions } = require('./src/texts')
 const { clear } = require('./src/styles')
+const exec = require('./src/exec')
 
 const rl = readline.createInterface({
   input: process.stdin,
@@ -15,7 +16,7 @@ const rl = readline.createInterface({
 readline.emitKeypressEvents(process.stdin);
 process.stdin.setRawMode(true);
 
-function askConfirmation() {
+function waitForInput() {
   return new Promise((resolve) => {
     process.stdin.on('keypress', (str, key) => {
       if (key.ctrl && key.name === 'c') {
@@ -55,19 +56,27 @@ function interrogate(
 ) {
   render(remaining, answered)
 
-  askConfirmation().then((answer) => {
-    shouldContinue(answer)
+  waitForInput()
 
-    if (remaining.length !== 1) {
-      interrogate(
-        [ ...remaining.slice(1, remaining.length) ],
-        [ ...answered, remaining[0] ]
-      )
-    } else {
-      render(undefined, [ ...answered, ...remaining ])
-      process.exit()
-    }
-  })
+    .then((answer) => {
+      shouldContinue(answer)
+
+      if (remaining[0].command) {
+        return exec(remaining[0].command)
+      }
+    })
+    
+    .then(() => {
+      if (remaining.length !== 1) {
+        interrogate(
+          [ ...remaining.slice(1, remaining.length) ],
+          [ ...answered, remaining[0] ]
+        )
+      } else {
+        render(undefined, [ ...answered, ...remaining ])
+        process.exit()
+      }
+    })
 }
 
 interrogate(questions)
